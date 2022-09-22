@@ -5,10 +5,14 @@ const findExportedNode = require('../utils/findExportedNode');
 const transformNode = require('../utils/transformNode');
 const { stringify } = require('querystring');
 
-const importFigma = async (token, fileKey, exportTo) => {
+const importFigma = async (token, fileKey, exportTo = "./figmaExported/") => {
     const api = new Figma.Api({
         personalAccessToken: token
     });
+
+    if(!fs.existsSync(exportTo)) {
+        fs.mkdirSync(exportTo);
+    }
 
     const file = await api.getFile(fileKey);
     const nodes = findExportedNode(file.document);
@@ -16,18 +20,16 @@ const importFigma = async (token, fileKey, exportTo) => {
         transformNode(n, file.components);
         const tag = buildTagTree(n);
         const codeStr = buildCode(tag, 'css');
-        const codeStrFile = 'codeStr.txs'
-        fs.writeFile(codeStrFile, codeStr, (err) => {
+        const codeFileName = `${exportTo}/${n.name}.tsx`;
+        fs.writeFile(codeFileName, codeStr, (err) => {
             if(err) throw err
         })
         
         const cssStr = buildCssString(tag, 'css');
-        const cssStrFile = 'cssStr.txs'
-        fs.writeFile(cssStrFile, cssStr, (err) => {
+        const cssFileName = `${exportTo}/${n.name}.css`
+        fs.writeFile(cssFileName, cssStr, (err) => {
             if(err) throw err
         })
-        // console.log(codeStr);
-        // console.log(cssStr);
     })
     return file;
 }

@@ -3,6 +3,7 @@ const _ = require('lodash');
 const findExportedNode = (node) => {
     const res = [];
     if(shouldBeExported(node.name)) {
+        node.name = node.name.replace(':Export', '');
         res.push(node);
     }
 
