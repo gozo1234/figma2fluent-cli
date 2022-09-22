@@ -3,18 +3,22 @@ const {buildTagTree, buildCode, buildCssString} = require('figma-tree-parser');
 const findExportedNode = require('../utils/findExportedNode');
 const transformNode = require('../utils/transformNode');
 
-const importFigma = async () => {
+const importFigma = async (token, fileKey, exportTo) => {
     const api = new Figma.Api({
-        personalAccessToken: 'figd_MD77SLFUyvbMYOImzQzTnhn_xHU7BJPpsMKTeGA3'
+        personalAccessToken: token
     });
 
-    const file = await api.getFile('eyLp7ZHQrTO68N7KDuAhlm');
+    const file = await api.getFile(fileKey);
     const nodes = findExportedNode(file.document);
     nodes.forEach(n => {
-        transformNode(n);
+        transformNode(n, file.components);
         const tag = buildTagTree(n);
         const codeStr = buildCode(tag, 'css');
         const cssStr = buildCssString(tag, 'css');
+        console.log(codeStr);
+        console.log(cssStr);
+        //todo
+        //export to file
     })
     return file;
 }
